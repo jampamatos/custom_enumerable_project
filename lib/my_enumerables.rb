@@ -69,26 +69,21 @@ module Enumerable
     result
   end
 
-  def my_inject(initial = first, sym = nil)
-    memo = initial
+  def my_inject(acc = nil, sym = nil)
+    sym, acc = acc, nil if acc && !sym && !block_given?
 
     enum = to_a
 
-    if block_given?
-      enum.my_each_with_index do |el, idx|
-        next if memo == first && idx.zero?
-
-        memo = yield memo, el
-      end
-    else
-      block = sym.to_proc
-      enum.my_each_with_index do |el, idx|
-        next if memo == first && idx.zero?
-
-        memo = block.call memo, el
+    enum.my_each do |el|
+      if !acc
+        acc = el
+      elsif sym
+        acc = acc.send(sym, el)
+      else
+        acc = yield acc, el
       end
     end
-    memo
+    acc
   end
 end
 
@@ -106,30 +101,3 @@ class Array
     self
   end
 end
-
-# Same using a block and inject
-puts ((5..10).my_inject { |sum, n| sum + n })
-#=> 45
-
-# Same using a block
-puts ((5..10).my_inject(1) { |product, n| product * n })
-#=> 151200
-
-# find the longest word
-longest = %w[cat sheep bear].inject do |memo, word|
-  memo.length > word.length ? memo : word
-end
-puts longest
-#=> "sheep"
-
-###########################
-
-# WITH SYMBOLS
-
-# Sum some numbers
-#puts ((5..10).my_inject(:+))
-# => 45
-
-# Multiply some numbers
-puts ((5..10).my_inject(1, :*))
-# => 151200
