@@ -69,19 +69,23 @@ module Enumerable
     result
   end
 
-  def my_inject(initial = 0, sym = nil)
+  def my_inject(initial = first, sym = nil)
     memo = initial
 
     enum = to_a
 
     if block_given?
-      enum.my_each do |el|
-        memo = yield el, memo
+      enum.my_each_with_index do |el, idx|
+        next if memo == first && idx.zero?
+
+        memo = yield memo, el
       end
     else
       block = sym.to_proc
-      enum.my_each do |el|
-        memo = block.call el, memo
+      enum.my_each_with_index do |el, idx|
+        next if memo == first && idx.zero?
+
+        memo = block.call memo, el
       end
     end
     memo
