@@ -72,9 +72,7 @@ module Enumerable
   def my_inject(acc = nil, sym = nil)
     sym, acc = acc, nil if acc && !sym && !block_given?
 
-    enum = to_a
-
-    enum.my_each do |el|
+    my_each do |el|
       if !acc
         acc = el
       elsif sym
@@ -95,9 +93,11 @@ class Array
   def my_each(&proc)
     return to_enum(:my_each) unless block_given?
 
-    for i in self
+    enum = to_a
+
+    for i in enum
       proc.call(i)
     end
-    self
+    enum
   end
 end
